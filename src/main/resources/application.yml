@@ -7,13 +7,13 @@ spring:
     active: local
     include: google, naver, kakao
   datasource:
-    url: jdbc:mysql://localhost:3306/assignment?serverTimezone=UTC&chyaracterEncoding=UTF-8
+    url: jdbc:mysql://52.79.227.132:3306/chatting?serverTimezone=UTC&characterEncoding=UTF-8&useSSL=false&serverTimeZone=asia/Seoul&allowPublicKeyRetrieval=true
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     open-in-view: false
     properties:
       hibernate:
