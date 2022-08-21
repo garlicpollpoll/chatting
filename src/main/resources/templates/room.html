@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.2.0/dist/css/bootstrap.min.css">
+    <script src="/webjars/vue/2.6.14/dist/vue.min.js"></script>
+    <script src="/webjars/axios/0.21.1/dist/axios.min.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <div class="col-6">
+
+    </div>
+    <div>
+        <div id="msgArea" class="col">
+            <div class="col-6" th:each="messages : ${messages}">
+                <div th:classappend="${messages.writer} == ${session.loginId} ? 'alert alert-secondary' : 'alert alert-warning'">
+                    <b th:text="|${messages.writeTime} ${messages.room.member.loginId} : ${messages.message}|"></b>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="input-group mb-3">
+                <input type="text" id="msg" class="form-control" onkeyup="enterKey()">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="button-send">전송</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6"></div>
+</div>
+</body>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function(){
+
+        var roomId = [[${room.roomId}]];
+        var username = [[${session.loginId}]];
+        const date = new Date();
+        var time = date.toLocaleTimeString('ko-kr').substring(0, 7);
+
+        console.log(roomId + ", " + username);
+
+        var sockJs = new SockJS("/stomp/chat");
+        //1. SockJS를 내부에 들고있는 stomp를 내어줌
+        var stomp = Stomp.over(sockJs);
+
+        axios.get('/chat/user').then(response => {
+            this.token = response.headers.token;
+            console.log("토큰 : " + this.token);
+
+            //2. connection이 맺어지면 실행
+            stomp.connect({"token" : this.token}, function (){
+                console.log("STOMP Connection")
+                console.log(sockJs);
+                console.log(stomp);
+
+                //4. subscribe(path, callback)으로 메세지를 받을 수 있음
+                stomp.subscribe("/sub/chat/room/" + roomId, function (chat) {
+                    var content = JSON.parse(chat.body);
+
+                    var writer = content.writer;
+                    var message = content.message;
+                    var str = '';
+
+                    if(writer === username){
+                        str = "<div class='col-6'>";
+                        str += "<div class='alert alert-secondary'>";
+                        str += "<b>" + time + " " + writer + " : " + message + "</b>";
+                        str += "</div></div>";
+                    }
+                    else{
+                        str = "<div class='col-6'>";
+                        str += "<div class='alert alert-warning'>";
+                        str += "<b>" + time + " " + writer + " : " + message + "</b>";
+                        str += "</div></div>";
+                    }
+                    $("#msgArea").append(str);
+                });
+
+                //3. send(path, header, message)로 메세지를 보낼 수 있음
+                stomp.send('/pub/chat/enter', {}, JSON.stringify({roomId: roomId, writer: username}))
+            });
+
+        })
+
+        $("#button-send").on("click", function(e){
+            var msg = document.getElementById("msg");
+
+            console.log(username + ":" + msg.value);
+            stomp.send('/pub/chat/message', {}, JSON.stringify({roomId: roomId, message: msg.value, writer: username}));
+            msg.value = '';
+        });
+
+        var input = document.getElementById('msg');
+
+        input.addEventListener("keyup", function (event) {
+            if (event.keyCode === 13) {
+                document.getElementById("button-send").click();
+            }
+        });
+    });
+    /*]]>*/
+</script>
+</html>

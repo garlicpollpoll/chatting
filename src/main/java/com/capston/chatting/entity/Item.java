@@ -18,7 +18,12 @@ public class Item {
     private int price;
     private String comment;
 
-    public Item(String itemName, int price, String comment) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    public Item(String itemName, int price, String comment, Member member) {
+        this.member = member;
         this.itemName = itemName;
         this.price = price;
         this.comment = comment;

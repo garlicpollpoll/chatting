@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.2.0/dist/css/bootstrap.min.css">
+
+</head>
+<body>
+<div class="container">
+    <div>
+        <ul th:each="room : ${list}">
+            <li><a th:href="@{/chat/room(roomId=${room.roomId})}" th:text="${room.item.itemName}"></a></li>
+        </ul>
+    </div>
+</div>
+</body>
+
+</html>

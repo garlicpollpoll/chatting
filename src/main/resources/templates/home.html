@@ -1,11 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous" type="application/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js" type="application/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js" type="application/javascript"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.2.0/dist/css/bootstrap.min.css">
+    <script src="/webjars/bootstrap/5.2.0/dist/js/bootstrap.min.js"></script>
+    <script src="/webjars/vue/2.6.14/dist/vue.min.js" type="application/javascript"></script>
+    <script src="/webjars/axios/0.21.1/dist/axios.min.js" type="application/javascript"></script>
+
+    <style>
+        .disappear {
+            animation: fade-out 1s;
+            animation-fill-mode: forwards;
+            width: 100px;
+            height: 100px;
+        }
+
+        @keyframes fade-out {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 <body>
 안녕하세요 임경석의 사이트입니다.
-<a href="upload">상품 등록</a>
+<a href="/login">로그인</a>
+<a href="/item_list">상품 리스트</a>
+<a href="/upload">상품 업로드</a>
+<a href="/chat/rooms">채팅방 목록</a>
+<a href="/logout">로그아웃</a>
+
+<div id="msgStack">
+
+</div>
 </body>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function(){
+        const loginId = [[${session.loginId}]];
+        let information = [[${myRoom}]];
+
+        console.log(information);
+        console.log("---------------------");
+
+        if (loginId != '') {
+            const sockJs = new SockJS("/stomp/chat");
+            //1. SockJS를 내부에 들고있는 stomp 를 내어줌
+            const stomp = Stomp.over(sockJs);
+
+            axios.get('/chat/user').then(response => {
+                this.token = response.headers.token;
+                console.log("토큰 : " + this.token);
+
+                //2. connection 이 맺어지면 실행
+                stomp.connect({"token" : this.token}, function (){
+                    console.log("STOMP Connection")
+
+                    for (var i = 0; i < information.length; i++) {
+                        console.log("roomId : " + information[i].roomId);
+                        console.log("itemName : " + information[i].itemName);
+                        const itemName = information[i].itemName;
+                        const roomId = information[i].roomId;
+                        stomp.subscribe("/sub/chat/room/" + information[i].roomId, function (chat) {
+                            var content = JSON.parse(chat.body);
+
+                            var writer = content.writer;
+                            var message = content.message;
+
+                            let toast = "<a href='#' id='anchor'>";
+                            toast += "<div class='position-fixed bottom-0 end-0 p-3' style='z-index: 11'>";
+                            toast += "<div id='liveToast' class='toast' role='alert' aria-live='assertive' aria-atomic='true'>";
+                            toast += "<div class='toast-header'>";
+                            toast += "<strong class='me-auto'>" + itemName + "</strong>";
+                            toast += "<button type='button' class='btn-close' data-bs-dismiss='toast' aria-label='Close'></button>"
+                            toast += "</div>";
+                            toast += "<div class='toast-body'>";
+                            toast += message;
+                            toast += "</div>";
+                            toast += "</div>";
+                            toast += "</div>";
+                            toast += "</a>";
+                            $("#msgStack").append(toast);
+
+                            var anchor = document.getElementById('anchor');
+
+                            anchor.href = "/chat/room?roomId=" + roomId;
+
+                            main(roomId);
+
+                            console.log("writer : " + writer);
+                            console.log("message : " + message);
+                        });
+                    }
+                });
+            })
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function main(roomId) {
+            first(roomId);
+            await delay(4000);
+            second();
+        }
+
+        function first(roomId) {
+            var toastLiveExample = document.querySelector('.toast');
+            var toastView = new bootstrap.Toast(toastLiveExample);
+            toastView.show();
+            console.log("first() 함수 시작");
+            console.log("roomId : " + roomId);
+        }
+
+        function second() {
+            var position = document.getElementById('anchor');
+            position.remove();
+            console.log("second() 함수 시작");
+        }
+    });
+    /*]]>*/
+</script>
 </html>

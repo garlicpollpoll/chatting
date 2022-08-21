@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <ul th:each="items : ${items}">
+        <li th:text="${items.id}"></li>
+        <li>
+            <a th:text="${items.itemName}" th:href="@{/item_detail/{itemId}(itemId = ${items.id})}"></a>
+        </li>
+        <li th:text="${items.price}"></li>
+        <li th:text="${items.comment}"></li>
+    </ul>
+</div>
+</body>
+</html>

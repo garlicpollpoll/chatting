@@ -1,4 +1,4 @@
-package com.capston.chatting.dto;
+package com.capston.chatting.dto.Item;
 
 import lombok.Data;
 
