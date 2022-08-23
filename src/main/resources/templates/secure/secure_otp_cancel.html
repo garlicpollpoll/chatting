@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous" type="application/javascript"></script>
+
+    <style>
+        .field-error {
+            color: red;
+        }
+
+        .error {
+            border-color: red;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<input type="email" name="email" id="email">
+<button type="button" id="submit">전송하기</button>
+<form action="/secure/otp_cancel" method="post" th:object="${check}">
+    <input type="text" name="checkNum" th:field="*{checkNum}" th:errorclass="error">
+    <input type="submit" value="인증하기">
+    <div th:if="${#fields.hasGlobalErrors()}">
+        <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+    </div>
+</form>
+</body>
+<script>
+    $(document).ready(function () {
+        let button = document.getElementById('submit');
+
+        button.addEventListener('click', () => {
+            let email = document.getElementById('email').value;
+
+            if (email == '') {
+                alert("빈칸은 입력할 수 없습니다.");
+            }
+            else {
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    url : "/send_mail/otp_cancel",
+                    contentType : "application/json",
+                    data : JSON.stringify({
+                        email : email
+                    }),
+                    beforeSend : function () {
+                        $('html').css("cursor", "wait");
+                    },
+                    complete : function () {
+                        $('html').css("cursor", "auto");
+                    }
+                }).done(function (data) {
+                    alert(data.message);
+                })
+            }
+        })
+    })
+</script>
+</html>

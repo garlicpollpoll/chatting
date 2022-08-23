@@ -2,10 +2,9 @@ package com.capston.chatting.interceptor;
 
 import com.capston.chatting.entity.ChatRoom;
 import com.capston.chatting.entity.Member;
-import com.capston.chatting.repository.ChatMessageRepository;
 import com.capston.chatting.repository.MemberRepository;
-import com.capston.chatting.service.ChatMessageService;
-import com.capston.chatting.service.ChatRoomService;
+import com.capston.chatting.service.chat.ChatMessageService;
+import com.capston.chatting.service.chat.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;

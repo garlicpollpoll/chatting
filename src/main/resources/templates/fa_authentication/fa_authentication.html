@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<label th:text="${security}"></label>
+<img th:src="${security}">
+<form action="/2FA_authentication" method="post">
+    <input type="hidden" name="secretKey" th:value="${secretKey}">
+    <input type="text" name="code">
+    <input type="submit" value="인증하기">
+</form>
+</body>
+</html>

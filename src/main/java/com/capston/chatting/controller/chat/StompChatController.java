@@ -4,21 +4,16 @@ import com.capston.chatting.dto.ChatMessageDTO;
 import com.capston.chatting.entity.ChatRoom;
 import com.capston.chatting.entity.Member;
 import com.capston.chatting.provider.JwtTokenProvider;
-import com.capston.chatting.repository.ChatMessageRepository;
-import com.capston.chatting.repository.ChatRoomRepository;
 import com.capston.chatting.repository.MemberRepository;
-import com.capston.chatting.service.ChatMessageService;
-import com.capston.chatting.service.ChatRoomService;
+import com.capston.chatting.service.chat.ChatMessageService;
+import com.capston.chatting.service.chat.ChatRoomService;
+import com.capston.chatting.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -32,6 +27,10 @@ public class StompChatController {
     private final ChatMessageService chatMessageService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * 메시지를 보낼 때 호출되는 컨트롤러
+     * @param message
+     */
     @MessageMapping(value = "/chat/message")
     public void message(ChatMessageDTO message) {
         Member findMember = memberRepository.findMemberByLoginId(message.getWriter());

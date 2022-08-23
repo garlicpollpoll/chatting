@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous" type="application/javascript"></script>
+
+    <style>
+        .field-error {
+            color: red;
+        }
+
+        .error {
+            border-color: red;
+            color: red;
+        }
+    </style>
+
+</head>
+<body>
+    <input type="email" name="email" id="email" placeholder="email">
+    <button type="button" value="전송" id="submit">전송</button>
+
+    <form action="/authentication_for_email" th:object="${email}" method="post">
+        <input type="text" name="checkNum" th:field="*{checkNum}" th:errorclass="error">
+        <input type="submit" value="인증하기">
+        <div class="field-error">
+            <label th:errors="*{checkNum}"></label>
+        </div>
+
+        <div th:if="${#fields.hasGlobalErrors()}">
+            <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+        </div>
+
+    </form>
+</body>
+<script>
+    $(document).ready(function () {
+        let button = document.getElementById('submit');
+
+        button.addEventListener('click', () => {
+            var email = document.getElementById('email').value;
+            console.log(email);
+
+            if (email == '') {
+                alert("빈칸은 입력할 수 없습니다.");
+            }
+            else {
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    url : "/inactive_account",
+                    contentType : "application/json",
+                    data : JSON.stringify({
+                        email : email
+                    }),
+                    beforeSend : function () {
+                        $('html').css("cursor", "wait");
+                    },
+                    complete : function () {
+                        $('html').css("cursor", "auto");
+                    }
+                }).done(function (data) {
+                    alert(data.message);
+                })
+            }
+        })
+    })
+</script>
+</html>

@@ -11,10 +11,10 @@ import com.capston.chatting.provider.JwtTokenProvider;
 import com.capston.chatting.repository.ChatMessageRepository;
 import com.capston.chatting.repository.ItemRepository;
 import com.capston.chatting.repository.MemberRepository;
-import com.capston.chatting.service.ChatRoomService;
+import com.capston.chatting.service.chat.ChatRoomService;
+import com.capston.chatting.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -27,7 +27,6 @@ import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
@@ -40,9 +39,14 @@ public class RoomController {
     private final ItemRepository itemRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final MemberService memberService;
 
 
-    // 로그인 유저 정보 조회하는 API
+    /**
+     * 로그인 유저 정보 조회하는 API 해당 url 로 접근할 경우 jwt token 을 받는다.
+     * @param response
+     * @return
+     */
     @GetMapping("/user")
     @ResponseBody
     public LoginInfoDto getUserInfo(HttpServletResponse response) {
@@ -58,7 +62,12 @@ public class RoomController {
         return LoginInfoDto.builder().name(name).token(token).build();
     }
 
-    //자기가 속해있는 roomId 모두 가져오는 API
+    /**
+     * axios 로 해당 url 로의 접근은 이제 하지 않습니다.
+     * @deprecated
+     * @param session
+     * @return
+     */
     @GetMapping("/get_room_id")
     @ResponseBody
     public List<GetRoomIdDto> getRoomId(HttpSession session) {
@@ -80,7 +89,11 @@ public class RoomController {
         return roomIds;
     }
 
-    //채팅방 목록 조회
+    /**
+     * 채팅방 목록 조회
+     * @param session
+     * @return
+     */
     @GetMapping("/rooms")
     public ModelAndView rooms(HttpSession session) {
         String loginId = (String) session.getAttribute("loginId");
@@ -90,6 +103,9 @@ public class RoomController {
         if (findMember == null) {
             throw new MemberNotFoundException("해당하는 회원이 없습니다.");
         }
+        else {
+            memberService.updateDate(findMember);
+        }
 
         ModelAndView mv = new ModelAndView("chat_list");
 
@@ -98,7 +114,13 @@ public class RoomController {
         return mv;
     }
 
-    //채팅방 조회
+    /**
+     * 채팅방 안에 있는 대화 내용 조회
+     * @param roomId
+     * @param session
+     * @param response
+     * @return
+     */
     @GetMapping("/room")
     public ModelAndView room(@RequestParam("roomId") String roomId, HttpSession session, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -110,6 +132,10 @@ public class RoomController {
         String loginId = (String) session.getAttribute("loginId");
 
         Member findMember = memberRepository.findMemberByLoginId(loginId);
+
+        if (findMember != null) {
+            memberService.updateDate(findMember);
+        }
 
         List<ChatMessage> findMessages = chatMessageRepository.findChatMessageByRoomId(roomId);
 
@@ -123,7 +149,13 @@ public class RoomController {
         return mv;
     }
 
-    //채팅방 개설
+    /**
+     * itemId 를 입력받아 채팅방 개설
+     * @param itemId
+     * @param session
+     * @param redirectAttributes
+     * @return
+     */
     @GetMapping("/make_room/{itemId}")
     @Transactional
     public String create(@PathVariable("itemId") Long itemId, HttpSession session, RedirectAttributes redirectAttributes) {
@@ -132,6 +164,10 @@ public class RoomController {
         String loginId = (String) session.getAttribute("loginId");
 
         Member findMember = memberRepository.findMemberByLoginId(loginId);
+
+        if (findMember != null) {
+            memberService.updateDate(findMember);
+        }
 
         ChatRoom chatRoom = chatRoomService.createChatRoom(findMember, findItem);
 

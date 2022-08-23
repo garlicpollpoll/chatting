@@ -1,9 +1,10 @@
 package com.capston.chatting.config;
 
-import com.capston.chatting.interceptor.MessageAlarmInterceptor;
+import com.capston.chatting.interceptor.CheckOtpApplyInterceptor;
 import com.capston.chatting.repository.MemberRepository;
-import com.capston.chatting.service.ChatMessageService;
-import com.capston.chatting.service.ChatRoomService;
+import com.capston.chatting.service.chat.ChatMessageService;
+import com.capston.chatting.service.chat.ChatRoomService;
+import com.capston.chatting.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -13,16 +14,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final MemberRepository memberRepository;
-    private final ChatRoomService chatRoomService;
-    private final ChatMessageService chatMessageService;
+    private final MemberService memberService;
 
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(new MessageAlarmInterceptor(chatMessageService, memberRepository, chatRoomService))
-//                .order(1)
-//                .addPathPatterns("/**")
-//                .excludePathPatterns("/css/**", "/*.ico", "/error", "/auth/loginProc", "/chat/**");
-//
-//    }
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new CheckOtpApplyInterceptor(memberService))
+                .order(1)
+                .addPathPatterns("/chat/**", "/upload")
+                .excludePathPatterns();
+
+    }
 }

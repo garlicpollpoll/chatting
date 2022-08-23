@@ -1,4 +1,4 @@
-package com.capston.chatting.service;
+package com.capston.chatting.service.item;
 
 import com.capston.chatting.dto.Item.ItemUploadDto;
 import com.capston.chatting.entity.Item;

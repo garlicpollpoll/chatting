@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -35,7 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests().antMatchers(
                         "/", "/css/**", "/image/**", "/js/**", "/h2-console/**", "/login", "/auth/loginProc",
-                        "/user", "/join", "/stomp/chat"
+                        "/user", "/join", "/stomp/chat", "/job_start"
                 ).permitAll()
                 .antMatchers("/chat/**").hasRole("USER")
                 .anyRequest().authenticated()

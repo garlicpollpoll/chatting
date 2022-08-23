@@ -1,4 +1,4 @@
-package com.capston.chatting.service;
+package com.capston.chatting.service.chat;
 
 import com.capston.chatting.dto.ChatRoomDTO;
 import com.capston.chatting.entity.ChatRoom;
